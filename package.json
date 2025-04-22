@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "debug-paths": "echo 'BASE_URL in .env:' && cat .env || echo 'No .env file'"
   },
   "dependencies": {
     "@react-three/drei": "^9.108.1",

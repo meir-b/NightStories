@@ -21,6 +21,8 @@ export function BookProvider({ children }) {
       try {
         setIsLoading(true);
         
+        console.log("BASE_URL:", import.meta.env.BASE_URL);
+        
         // Define the known story directories - this could be fetched from an API in production
         const knownStoryDirs = ['Story1']; //, 'Story2'];
         const discoveredBooks = [];
@@ -28,7 +30,8 @@ export function BookProvider({ children }) {
         // For each directory, try to load its manifest
         for (const storyDir of knownStoryDirs) {
           try {
-            const manifestResponse = await fetch(`/Content/${storyDir}/manifest.json`);
+            const manifestResponse = await fetch(`${import.meta.env.BASE_URL}Content/${storyDir}/manifest.json`);
+    
             
             if (manifestResponse.ok) {
               const manifestData = await manifestResponse.json();
@@ -65,7 +68,7 @@ export function BookProvider({ children }) {
               id: "Story1",
               title: "המשאית האדומה",
               description: "שיתוף ותורנות",
-              coverImage: "/Content/Story1/textures/front.jpg"
+               coverImage: `${import.meta.env.BASE_URL}Content/Story1/textures/front.jpg`
             }
           ];
           setBooks(mockBooks);
@@ -82,7 +85,7 @@ export function BookProvider({ children }) {
             id: "Story1",
             title: "המשאית האדומה",
             description: "שיתוף ותורנות",
-            coverImage: "/Content/Story1/textures/front.jpg"
+            coverImage: `${import.meta.env.BASE_URL}Content/Story1/textures/front.jpg`
           }
         ];
         setBooks(fallbackBooks);
@@ -105,7 +108,7 @@ export function BookProvider({ children }) {
       setIsLoading(true);
       setPage(0); // Reset to first page when loading a new book
       
-      const response = await fetch(`/Content/${bookId}/manifest.json`);
+      const response = await fetch(`${import.meta.env.BASE_URL}Content/${bookId}/manifest.json`);
       
       if (!response.ok) {
         throw new Error(`Failed to load book ${bookId}`);
