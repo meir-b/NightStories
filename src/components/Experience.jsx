@@ -14,25 +14,38 @@ export const Experience = ({ bookData }) => {
   const initialRenderRef = useRef(true);
   const floatRef = useRef();
   
-  // Calculate responsive book scale based on viewport - REDUCED SCALE TO KEEP IN VIEWPORT
+  // Add state to track orientation
+  const [isLandscape, setIsLandscape] = useState(false);
+  
+  // Update orientation state based on viewport
+  useEffect(() => {
+    setIsLandscape(viewport.width > viewport.height);
+  }, [viewport.width, viewport.height]);
+  
+  // Calculate responsive book scale based on viewport - ENHANCED FOR LANDSCAPE MODE
   const getBookScale = () => {
-    // Slightly reduced scale to prevent overflow
-    const baseScale = 1.65; // Reduced from 1.9
+    // Base scale
+    const baseScale = 1.65;
     
-    // For mobile screens (portrait orientation)
-    if (viewport.width < viewport.height && viewport.width < 5) {
-      return baseScale * 0.95; // Reduced from 1.1
+    // Landscape orientation on mobile - needs to be smaller
+    if (isLandscape && viewport.height < 5) {
+      return baseScale * 0.7; // Much smaller in mobile landscape
+    }
+    
+    // Portrait orientation on mobile
+    if (!isLandscape && viewport.width < 5) {
+      return baseScale * 0.88; // Slightly reduced for portrait
     }
     
     // For larger screens
     if (viewport.width > 10) {
-      return baseScale * 1.3; // Reduced from 1.4
+      return baseScale * 1.25;
     }
     
     return baseScale;
   };
   
-  // Use a gentle idle animation with MORE UPRIGHT ANGLE
+  // Use a gentler idle animation for landscape mode
   useFrame((_, delta) => {
     if (!isAnimating || !floatRef.current) return;
     
@@ -40,10 +53,19 @@ export const Experience = ({ bookData }) => {
     const gentleMovement = Math.sin(time) * 0.03;
     
     if (floatRef.current.rotation) {
-      // Even more upright position for better fit on screen
-      floatRef.current.rotation.x = -Math.PI / 9 + gentleMovement * 0.1; // Changed from PI/7 to PI/9
-      // Lower Y position to keep in viewport
-      floatRef.current.position.y = 0.1 + gentleMovement; // Changed from 0.5 to 0.1
+      // More upright position in landscape mode
+      const xRotation = isLandscape 
+        ? -Math.PI / 12 + gentleMovement * 0.1  // More upright in landscape
+        : -Math.PI / 9 + gentleMovement * 0.1;  // Standard in portrait
+      
+      floatRef.current.rotation.x = xRotation;
+      
+      // Position adjustments for orientation
+      const yPosition = isLandscape
+        ? -0.3 + gentleMovement  // Lower in landscape
+        : 0.1 + gentleMovement;  // Standard in portrait
+      
+      floatRef.current.position.y = yPosition;
     }
   });
   
@@ -72,10 +94,15 @@ export const Experience = ({ bookData }) => {
 
   // Initial layout calculations
   const scale = getBookScale();
-  // MORE UPRIGHT ANGLE - for better fit on screen
-  const rotation = [-Math.PI / 9, 0, 0]; // Changed from PI/7 to PI/9
-  // Lower position to keep book in viewport
-  const position = [0, 0.0, 0]; // Changed Y from 0.5 to 0.0
+
+  // Adjust positioning based on orientation
+  const rotation = isLandscape 
+    ? [-Math.PI / 12, 0, 0] // More upright in landscape
+    : [-Math.PI / 11, 0, 0]; // Standard in portrait
+  
+  const position = isLandscape
+    ? [0, -0.3, 0] // Lower in landscape
+    : [0, -0.2, 0]; // Standard in portrait
   
   return (
     <>

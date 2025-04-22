@@ -16,18 +16,18 @@ const BookReader = () => {
   // Update the camera position calculation for better framing
   const cameraPosition = useMemo(() => {
     if (windowWidth < 480) {
-      return [-0.25, 0.2, 7.5];
+      return [-0.25, 0.0, 7.2]; // Better framing for small phones
     } else if (windowWidth < 768) {
-      return [-0.25, 0.2, 6.5];
+      return [-0.25, 0.0, 6.2]; // Better framing for larger phones
     } else if (windowWidth < 1024) {
-      return [-0.25, 0.2, 5.5];
+      return [-0.25, 0.2, 5.5]; // Tablets
     } else if (windowWidth < 1440) {
-      return [-0.25, 0.2, 4.8];
+      return [-0.25, 0.2, 4.8]; // Small desktops
     } else {
-      return [-0.25, 0.2, 4.2];
+      return [-0.25, 0.2, 4.2]; // Large desktops
     }
   }, [windowWidth]);
-  
+
   // Update window width when resized - debounced
   useEffect(() => {
     let timeoutId = null;
@@ -54,6 +54,7 @@ const BookReader = () => {
       <UI bookData={selectedBook} />
       <Loader />
       <Canvas 
+        className="fixed inset-0 w-full h-full" // Add fixed positioning to the Canvas
         shadows 
         camera={{
           position: cameraPosition,
@@ -71,7 +72,6 @@ const BookReader = () => {
     </>
   );
 };
-
 // The main App component
 function App() {
   return (
@@ -82,7 +82,6 @@ function App() {
 }
 
 // The content portion that depends on book selection state
-// The content portion that depends on book selection state
 function AppContent() {
   const { selectedBook, resetSelection } = useBook();
   const [windowWidth, setWindowWidth] = useState(
@@ -91,6 +90,17 @@ function AppContent() {
   
   // Check if we're on mobile
   const isMobile = windowWidth < 768;
+  
+  // Toggle book reading mode class when switching between selection and reading
+  useEffect(() => {
+    const rootElement = document.getElementById('root');
+    
+    if (selectedBook) {
+      rootElement.classList.add('book-reading-mode');
+    } else {
+      rootElement.classList.remove('book-reading-mode');
+    }
+  }, [selectedBook]);
   
   // Update window width when resized
   useEffect(() => {
@@ -103,11 +113,11 @@ function AppContent() {
     <>
       {!selectedBook && <BookSelection />}
       {selectedBook && (
-        <div className="relative h-full">
+        <div className="fixed inset-0 w-full h-full">
           <BookReader />
           <button 
             className={`
-              absolute z-50 flex items-center
+              fixed z-50 flex items-center
               transition-all duration-300 ease-out
               border border-[#d4af37]/40 
               ${isMobile 
@@ -138,5 +148,4 @@ function AppContent() {
     </>
   );
 }
-
 export default App;

@@ -21,9 +21,10 @@
   font-weight: 700; /* Make text bolder */
 }
 
+/* Keep the root styles but revert overflow-x to overflow */
 #root {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   /* A brighter background for better contrast */
   background: radial-gradient(
     circle at center,
@@ -33,7 +34,17 @@
     #0a1829 100%
   );
   position: relative;
+  /* We'll control overflow at the component level instead */
   overflow: hidden;
+}
+
+/* Ensure the book-reading-mode class is properly defined */
+.book-reading-mode {
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  position: fixed !important;
+  inset: 0 !important;
 }
 
 /* Make all UI text larger */
@@ -43,4 +54,100 @@
 
 .text-3xl {
   font-size: 2.5rem !important; /* Much larger title */
+}
+
+
+/* Add these styles to improve mobile readability */
+
+/* Enhanced mobile text rendering */
+@media (max-width: 768px) {
+  /* Make all UI text even larger on mobile */
+  .text-xs {
+    font-size: 1.15rem !important;
+  }
+  
+  .text-3xl {
+    font-size: 2.75rem !important;
+  }
+  
+  /* Enhance child text for mobile */
+  .child-text {
+    font-family: 'Comic Neue', 'Poppins', sans-serif;
+    font-size: 1.7em !important; /* Even larger on mobile */
+    line-height: 1.7;
+    font-weight: 700;
+  }
+  
+  /* Hebrew text enhancement for mobile */
+  .hebrew-text {
+    font-family: 'Heebo', sans-serif;
+    direction: rtl;
+    text-align: right;
+    font-weight: 900 !important; /* Extra bold on mobile */
+  }
+}
+
+/* Mobile landscape mode optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Reduce title size in landscape */
+  .text-3xl {
+    font-size: 2rem !important;
+  }
+  
+  /* Make mobile navigation more compact */
+  .top-20 {
+    top: 4rem !important; /* Less space from top in landscape */
+  }
+  
+  /* Improve child-text readability in landscape */
+  .child-text {
+    font-size: 1.5em !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Bottom navigation - make more compact */
+  .bottom-4 {
+    bottom: 0.5rem !important; /* Closer to bottom */
+  }
+  
+  /* Adjust button sizes for landscape */
+  .w-14, .h-14 {
+    width: 2.8rem !important;
+    height: 2.8rem !important;
+  }
+}
+
+
+/* Add these mobile navigation animations */
+@keyframes float-pulse {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    transform: translateY(-2px);
+    box-shadow: 0 0 8px 2px rgba(212, 175, 55, 0.4);
+  }
+  100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4);
+  }
+}
+
+/* Apply this animation to the main nav button when it's not expanded */
+.main-nav-btn:not(.expanded) {
+  animation: float-pulse 2s ease-in-out infinite;
+}
+
+.nav-button-pulse {
+  animation: pulse-gentle 2s infinite;
+}
+
+/* Improve button tap feedback on mobile */
+.mobile-tap-effect {
+  transition: transform 0.1s;
+}
+
+.mobile-tap-effect:active {
+  transform: scale(0.95);
 }

@@ -1,9 +1,9 @@
 import { atom, useAtom } from "jotai";
 import { useEffect, useState, useRef } from "react";
+import { MobileNavigation } from "./MobileNavigation";
 
 // Update the atom to reset when changing books
 export const pageAtom = atom(0);
-
 
 // Function to get button icon/label based on page type
 const getPageLabel = (index, pages) => {
@@ -64,31 +64,76 @@ const getPageLabel = (index, pages) => {
   return `${index}`;
 };
 
-
 export const UI = ({ bookData }) => {
   const [page, setPage] = useAtom(pageAtom);
   const [showAllButtons, setShowAllButtons] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [showMobileNav, setShowMobileNav] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isLandscape, setIsLandscape] = useState(false);
   const audioRef = useRef(null);
   
   // Add safety checks for bookData
   const title = bookData?.title || "Night Stories";
   const pages = bookData?.pages || [];
   
-  // Get viewport width for responsive design
+  // Get viewport dimensions for responsive design
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
+  
+  const [windowHeight, setWindowHeight] = useState(
+    typeof window !== "undefined" ? window.innerHeight : 0
+  );
 
-  // Determine if we're on mobile - THIS WAS MISSING
+  // Determine if we're on mobile and orientation
   const isMobile = windowWidth < 768;
-
-  // Update window width when resized
+  
+  // Update detected orientation when dimensions change
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    setIsLandscape(windowWidth > windowHeight);
+  }, [windowWidth, windowHeight]);
+
+  // Update window dimensions when resized
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Handle scroll to hide/show mobile navigation
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY + 10) {
+        // Scrolling down - hide navigation
+        setShowMobileNav(false);
+      } else if (currentScrollY < lastScrollY - 10 || currentScrollY === 0) {
+        // Scrolling up or at top - show navigation
+        setShowMobileNav(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  // Show navigation when user taps screen (for mobile)
+  const handleScreenTap = () => {
+    if (!showMobileNav) {
+      setShowMobileNav(true);
+      // Hide again after 3 seconds of inactivity
+      setTimeout(() => {
+        setShowMobileNav(false);
+      }, 3000);
+    }
+  };
 
   // Initialize audio once
   useEffect(() => {
@@ -96,7 +141,6 @@ export const UI = ({ bookData }) => {
     const audioPath = `${import.meta.env.BASE_URL}audios/page-flip-01a.mp3`;
     audioRef.current = new Audio(audioPath);
     
-    // Rest of the function remains the same
     const handleFirstInteraction = () => {
       setUserInteracted(true);
       document.removeEventListener('click', handleFirstInteraction);
@@ -112,16 +156,13 @@ export const UI = ({ bookData }) => {
   // Play audio when page changes, but only after user has interacted
   useEffect(() => {
     if (userInteracted && audioRef.current) {
-      // Reset audio to beginning if it's already playing
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       
-      // Try to play and handle any errors silently
       const playPromise = audioRef.current.play();
       
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          // Auto-play was prevented - this is fine
           console.log("Audio playback prevented by browser policy");
         });
       }
@@ -136,10 +177,10 @@ export const UI = ({ bookData }) => {
   // Get visible pages for pagination - add safety check
   const getVisiblePages = () => {
     if (!pages || !pages.length) return [0];
-    if (!isMobile || showAllButtons) return [...Array(pages.length).keys()];
+    if (!isMobile || showAllButtons || isLandscape) return [...Array(pages.length).keys()];
     
     const visiblePages = [];
-    // Always show first and current
+    // Always show first page
     visiblePages.push(0);
     
     // Show current page and 1 page before/after
@@ -160,59 +201,48 @@ export const UI = ({ bookData }) => {
 
   return (
     <>
+      <div 
+        className="fixed inset-0 z-0"
+        onClick={handleScreenTap}
+      >
+        {/* Invisible touchscreen layer to detect taps */}
+      </div>
+      
       <main className="pointer-events-none select-none z-10 fixed inset-0 flex justify-between flex-col">
-        {/* Use title section with the book's title - with mobile padding for back button */}
-        <div className={`mt-4 md:mt-8 ${isMobile ? 'ml-20' : 'ml-4 md:ml-10'}`}>
-          <h1 className="text-[#e2c87d] text-3xl md:text-5xl font-light tracking-[0.2em] uppercase">
+        {/* Title section with improved spacing for both portrait and landscape */}
+        <div className={`
+          mt-4 md:mt-8 
+          ${isMobile && !isLandscape ? 'ml-20' : 'ml-4 md:ml-10'} 
+          ${isMobile && isLandscape ? 'text-center ml-0' : ''} 
+          pointer-events-auto
+        `}>
+          <h1 className={`
+            text-[#e2c87d] text-3xl md:text-5xl font-light tracking-[0.2em] uppercase
+            ${isMobile && isLandscape ? 'text-2xl' : ''}
+          `}>
             {title}
           </h1>
-          <div className="w-32 md:w-48 h-[1px] mt-1 md:mt-2 bg-gradient-to-r from-[#d4af37] via-[#f4e5b5] to-transparent"></div>
+          <div className={`
+            h-[1px] mt-1 md:mt-2 bg-gradient-to-r from-[#d4af37] via-[#f4e5b5] to-transparent
+            ${isMobile && isLandscape ? 'w-24 mx-auto' : 'w-32 md:w-48'}
+          `}></div>
         </div>
         
-          
-       {/* Updated container for better centering - mobile-first considerations */}
-       <div className="w-full pointer-events-auto flex flex-col justify-center items-center backdrop-blur-sm bg-black/10">
-          {/* Mobile pagination controls */}
-          {isMobile && (
-            <div className="w-full flex justify-between items-center px-4 py-3 border-b border-[#d4af37]/20">
-              <button 
-                onClick={() => setPage(Math.max(0, page - 1))}
-                disabled={page === 0}
-                className={`text-[#e2c87d] ${page === 0 ? 'opacity-30' : 'opacity-100'} px-4 py-2 text-lg`}
-              >
-                ◄ Prev
-              </button>
-              
-              <span className="text-[#e2c87d] text-base tracking-widest uppercase">
-                {page === 0 ? "Cover" : page === pages.length ? "Back" : `Page ${page}`}
-              </span>
-              
-              <button 
-                onClick={() => setPage(Math.min(pages.length, page + 1))}
-                disabled={page === pages.length}
-                className={`text-[#e2c87d] ${page === pages.length ? 'opacity-30' : 'opacity-100'} px-4 py-2 text-lg`}
-              >
-                Next ►
-              </button>
-            </div>
-          )}
+        {/* MOBILE NAVIGATION */}
+        {isMobile && (
+          <MobileNavigation 
+            pages={pages} 
+            page={page} 
+            getVisiblePages={getVisiblePages}
+          />
+        )}
                     
-          {/* Centered button container */}
-          <div className="flex justify-center items-center py-4 md:py-6">
+        {/* DESKTOP NAVIGATION - keep unchanged */}
+        {!isMobile && (
+          <div className="pointer-events-auto flex justify-center items-center py-4 md:py-6">
             <div className="flex items-center gap-2 md:gap-4 px-4 md:px-10 overflow-x-auto max-w-full">
-              {/* Toggle button for mobile */}
-              {isMobile && !showAllButtons && getVisiblePages().length < pages.length && (
-                <button
-                  onClick={() => setShowAllButtons(true)}
-                  className="min-w-[40px] h-[30px] flex items-center justify-center text-[#e2c87d] bg-black/20 text-xs flex-shrink-0"
-                >
-                  ...
-                </button>
-              )}
-              
-              {/* Page buttons - filtered for mobile */}
-              {(isMobile ? getVisiblePages() : [...Array(pages.length).keys()]).map((index) => {
-                // Safely check if this page has text content
+              {/* Page buttons - full desktop view */}
+              {[...Array(pages.length).keys()].map((index) => {
                 const pageData = pages[index];
                 const hasTextContent = 
                   (pageData && pageData.front && pageData.front.type === "text") || 
@@ -225,9 +255,9 @@ export const UI = ({ bookData }) => {
                       relative group overflow-hidden
                       shadow-[0_3px_10px_rgba(0,0,0,0.25)] 
                       transition-all duration-300 ease-out
-                      ${isMobile ? 'px-3 py-1.5' : 'px-7 py-2.5'}
+                      px-7 py-2.5
                       text-xs tracking-[0.15em] uppercase font-light
-                      ${isMobile ? 'min-w-[36px]' : 'min-w-[60px]'}
+                      min-w-[60px]
                       flex-shrink-0
                       ${
                         index === page
@@ -239,40 +269,33 @@ export const UI = ({ bookData }) => {
                     `}
                     onClick={() => setPage(index)}
                   >
-                    {/* Pass pages to getPageLabel */}
                     <span className="relative z-10">
                       {getPageLabel(index, pages)}
                     </span>
 
-                    {/* Gold accent borders */}
                     <span className={`absolute inset-0 border border-[#d4af37] opacity-${index === page ? '90' : '30'} group-hover:opacity-70`}></span>
                     
-                    {!isMobile && (
-                      <>
-                        {/* Corner accents - only on desktop */}
-                        <span className="absolute w-1.5 h-1.5 border-t border-l border-[#d4af37] top-0 left-0"></span>
-                        <span className="absolute w-1.5 h-1.5 border-t border-r border-[#d4af37] top-0 right-0"></span>
-                        <span className="absolute w-1.5 h-1.5 border-b border-l border-[#d4af37] bottom-0 left-0"></span>
-                        <span className="absolute w-1.5 h-1.5 border-b border-r border-[#d4af37] bottom-0 right-0"></span>
-                      </>
-                    )}
+                    {/* Corner accents - only on desktop */}
+                    <span className="absolute w-1.5 h-1.5 border-t border-l border-[#d4af37] top-0 left-0"></span>
+                    <span className="absolute w-1.5 h-1.5 border-t border-r border-[#d4af37] top-0 right-0"></span>
+                    <span className="absolute w-1.5 h-1.5 border-b border-l border-[#d4af37] bottom-0 left-0"></span>
+                    <span className="absolute w-1.5 h-1.5 border-b border-r border-[#d4af37] bottom-0 right-0"></span>
                     
-                    {/* Button shine effect */}
                     <span className="absolute inset-0 w-full translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent"></span>
                   </button>
                 );
               })}
               
-              {/* Back cover button - only show if we have pages */}
+              {/* Back cover button - desktop */}
               {pages.length > 0 && (
                 <button
                   className={`
                     relative group overflow-hidden
                     shadow-[0_3px_10px_rgba(0,0,0,0.25)] 
                     transition-all duration-300 ease-out
-                    ${isMobile ? 'px-3 py-1.5' : 'px-7 py-2.5'}
+                    px-7 py-2.5
                     text-xs tracking-[0.15em] uppercase font-light
-                    ${isMobile ? 'min-w-[36px]' : 'min-w-[60px]'}
+                    min-w-[60px]
                     flex-shrink-0
                     ${
                       page === pages.length
@@ -282,39 +305,22 @@ export const UI = ({ bookData }) => {
                   `}
                   onClick={() => setPage(pages.length)}
                 >
-                  {/* Gold accent borders */}
                   <span className={`absolute inset-0 border border-[#d4af37] opacity-${page === pages.length ? '90' : '30'} group-hover:opacity-70`}></span>
                   
-                  {!isMobile && (
-                    <>
-                      {/* Corner accents - only on desktop */}
-                      <span className="absolute w-1.5 h-1.5 border-t border-l border-[#d4af37] top-0 left-0"></span>
-                      <span className="absolute w-1.5 h-1.5 border-t border-r border-[#d4af37] top-0 right-0"></span>
-                      <span className="absolute w-1.5 h-1.5 border-b border-l border-[#d4af37] bottom-0 left-0"></span>
-                      <span className="absolute w-1.5 h-1.5 border-b border-r border-[#d4af37] bottom-0 right-0"></span>
-                    </>
-                  )}
+                  {/* Corner accents - only on desktop */}
+                  <span className="absolute w-1.5 h-1.5 border-t border-l border-[#d4af37] top-0 left-0"></span>
+                  <span className="absolute w-1.5 h-1.5 border-t border-r border-[#d4af37] top-0 right-0"></span>
+                  <span className="absolute w-1.5 h-1.5 border-b border-l border-[#d4af37] bottom-0 left-0"></span>
+                  <span className="absolute w-1.5 h-1.5 border-b border-r border-[#d4af37] bottom-0 right-0"></span>
                   
-                  {/* Button text */}
                   <span className="relative z-10">Back</span>
                   
-                  {/* Subtle hover shine effect */}
                   <span className="absolute inset-0 w-full translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent"></span>
-                </button>
-              )}
-              
-              {/* Toggle button for mobile - show less pages */}
-              {isMobile && showAllButtons && (
-                <button
-                  onClick={() => setShowAllButtons(false)}
-                  className="min-w-[40px] h-[30px] flex items-center justify-center text-[#e2c87d] bg-black/20 text-xs flex-shrink-0"
-                >
-                  Less
                 </button>
               )}
             </div>
           </div>
-        </div>
+        )}
       </main>
 
       {/* Background with subtle gold dust */}
