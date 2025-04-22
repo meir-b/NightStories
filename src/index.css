@@ -1,0 +1,46 @@
+/* Import both Poppins, Comic Sans, and a Hebrew font */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100..900&family=Heebo:wght@400;700;900&family=Comic+Neue:wght@400;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Font configuration for RTL support */
+.hebrew-text {
+  font-family: 'Heebo', sans-serif;
+  direction: rtl;
+  text-align: right;
+  font-weight: 700; /* Make Hebrew bolder */
+}
+
+/* Child-friendly text */
+.child-text {
+  font-family: 'Comic Neue', 'Poppins', sans-serif;
+  font-size: 1.5em; /* Increased from 1.2em */
+  line-height: 1.6;
+  font-weight: 700; /* Make text bolder */
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  /* A brighter background for better contrast */
+  background: radial-gradient(
+    circle at center,
+    #2d4170 0%,
+    #22366b 35%,
+    #15264d 70%,
+    #0a1829 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Make all UI text larger */
+.text-xs {
+  font-size: 1rem !important; /* Much larger UI text */
+}
+
+.text-3xl {
+  font-size: 2.5rem !important; /* Much larger title */
+}
