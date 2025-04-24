@@ -80,32 +80,79 @@ export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
     resetTimer();
   };
 
-  // Function to check if current page has text content
-  const hasTextContent = () => {
+  // In the MobileNavigation component, update the hasTextContent function:
+
+// Function to check if current page has text content
+const hasTextContent = () => {
     if (!pages || page <= 0 || page > pages.length) return false;
     
-    const currentPage = pages[page - 1];
+    // For first page (0), check if it's the cover page - normally no text content
+    if (page === 0) {
+      return false;
+    }
+    
+    // For the last page (pages.length), check if it's back cover - normally no text content 
+    if (page === pages.length) {
+      return false;
+    }
+    
+    // For middle pages, we need to check both the current and previous page
+    const currentPageIndex = page - 1;
+    
+    // Check if the page is valid
+    if (currentPageIndex < 0 || currentPageIndex >= pages.length) return false;
+    
+    // Check if current page has text content on either front or back
+    const currentPage = pages[currentPageIndex];
     if (!currentPage) return false;
+    
+    // Check if adjacent page has visible text content
+    const prevPageIndex = currentPageIndex - 1;
+    if (prevPageIndex >= 0) {
+      const prevPage = pages[prevPageIndex];
+      if (prevPage && prevPage.back?.type === "text") {
+        return true;
+      }
+    }
     
     return (currentPage.front?.type === "text" || currentPage.back?.type === "text");
   };
   
-  // Function to handle zoom button click
+  // Function to handle zoom button click - update this to use the correct content
   const handleZoom = (e) => {
     e.stopPropagation();
     
     if (!hasTextContent()) return;
     
-    // Find the text content to zoom
-    const currentPage = pages[page - 1];
-    const textContent = currentPage.front?.type === "text" 
-      ? currentPage.front 
-      : currentPage.back?.type === "text" 
-        ? currentPage.back 
-        : null;
-        
+    // Find the text content to zoom based on page position
+    let textContent = null;
+    
+    // For middle pages, we need to check both the current and previous page
+    const currentPageIndex = page - 1;
+    
+    // First try the current page front
+    if (currentPageIndex >= 0 && currentPageIndex < pages.length) {
+      const currentPage = pages[currentPageIndex];
+      if (currentPage.front?.type === "text") {
+        textContent = currentPage.front;
+      } else if (currentPage.back?.type === "text") {
+        textContent = currentPage.back;
+      }
+    }
+    
+    // If not found, check the previous page back side
+    if (!textContent) {
+      const prevPageIndex = currentPageIndex - 1;
+      if (prevPageIndex >= 0 && prevPageIndex < pages.length) {
+        const prevPage = pages[prevPageIndex];
+        if (prevPage.back?.type === "text") {
+          textContent = prevPage.back;
+        }
+      }
+    }
+    
     if (textContent) {
-      console.log("Zooming in on text from nav");
+      console.log("Zooming in on text from mobile nav");
       setZoomPage({ isZoomed: true, pageData: textContent });
     }
     
@@ -217,7 +264,7 @@ export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
           </svg>
         </button>
       </div>
-      
+
       {/* Page selector that slides in from top - fixed to ensure it works on mobile */}
       <div 
         className={`

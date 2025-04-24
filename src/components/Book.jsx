@@ -459,89 +459,117 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
     }
   });
 
-  const [_, setPage] = useAtom(pageAtom);
-  const [, setZoomPage] = useAtom(zoomPageAtom);
-  const [highlighted, setHighlighted] = useState(false);
-  useCursor(highlighted);
+ // Improve zoom detection with proper state
+ const [_, setPage] = useAtom(pageAtom);
+ const [, setZoomPage] = useAtom(zoomPageAtom);
+ const [highlighted, setHighlighted] = useState(false);
+ const [clickCount, setClickCount] = useState(0);
+ useCursor(highlighted);
 
-  // Check if this page has text content that can be zoomed
-  const hasZoomableContent = useMemo(() => {
-    return (front.type === "text" || back.type === "text");
-  }, [front.type, back.type]);
+ // Refs for timing
+ const lastTapTimeRef = useRef(0);
+ const clickTimeoutRef = useRef(null);
 
-  
-  // Track tap timing for mobile double-tap detection
-  const lastTapTimeRef = useRef(0);
-
-  // Update the Page component to handle story pagination clicks properly
-  // Remove the following from createTextTexture function
-// 1. Remove all code related to pagination controls
-// 2. Remove code for handling continuedText arrays
-// 3. Keep only the basic text rendering functionality
-
-// Update the handleClick function to only handle page turning
-// Update the handleClick function to properly handle RTL navigation
-const handleClick = (e) => {
-  e.stopPropagation();
-  
-  const now = Date.now();
-  const DOUBLE_TAP_DELAY = 300; // ms
-  
-  if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
-    // Handle double-tap for zooming
-    if (hasZoomableContent) {
-      // Determine which side has text content to zoom
-      const zoomContent = front.type === "text" ? front : back.type === "text" ? back : null;
-      
-      if (zoomContent) {
-        console.log("Double-tap zoom on text content");
-        setZoomPage({ isZoomed: true, pageData: zoomContent });
-      }
-    }
-  } else {
-    // Single tap - handle page turning with proper RTL support
-    let pageToSet;
-    
-    if (props.isRTL === true) {
-      // RTL: Moving forward means decreasing the page number
-      pageToSet = opened ? number + 1 : number;
-      
-      // Ensure we don't go past the first or last page
-      pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
+ // Calculate which side of the page is currently visible based on opened state
+  // For pages in the middle of the book, this determines whether front or back is shown
+  const visibleSide = useMemo(() => {
+    if (opened) {
+      // When page is turned/opened
+      return 'back'; // The back side is visible
     } else {
-      // LTR: Moving forward means increasing the page number
-      pageToSet = opened ? number : number + 1;
-      
-      // Ensure we don't go past the first or last page
-      pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
+      // When page is not turned/opened
+      return 'front'; // The front side is visible
     }
-    
-    console.log(`Turning page to: ${pageToSet} (RTL: ${props.isRTL})`);
-    setPage(pageToSet);
-  }
-  
-  lastTapTimeRef.current = now;
-  setHighlighted(false);
-};
+  }, [opened]);
 
-// Add a double click handler for zooming
-const handleDoubleClick = (e) => {
-  e.stopPropagation();
-  
-  if (!hasZoomableContent) return;
-  
-  // Determine which side (front/back) has text content to zoom
-  const zoomContent = front.type === "text" ? front : back.type === "text" ? back : null;
-  
-  if (zoomContent) {
-    console.log("Zooming in on text content");
+  // Check if current visible side has text content that can be zoomed
+  const hasZoomableContent = useMemo(() => {
+    if (visibleSide === 'front' && front.type === "text") return true;
+    if (visibleSide === 'back' && back.type === "text") return true;
+    return false;
+  }, [visibleSide, front.type, back.type]);
+
+  // Get the currently visible text content for zooming
+  const zoomContent = useMemo(() => {
+    if (visibleSide === 'front' && front.type === "text") return front;
+    if (visibleSide === 'back' && back.type === "text") return back;
+    return null;
+  }, [visibleSide, front, back]);
+
+ // Improved handle click with better detection for both mobile and desktop
+ const handleClick = (e) => {
+   e.stopPropagation();
+   
+   const now = Date.now();
+   const DOUBLE_TAP_DELAY = 500; // Increased from 300ms for more reliable detection
+   
+   // For mobile: detect double tap
+   if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
+     // This is a double-tap/click
+     handleZoom();
+     // Reset
+     lastTapTimeRef.current = 0;
+     clearTimeout(clickTimeoutRef.current);
+     return;
+   }
+   
+   // For desktop: track clicks and use setTimeout
+   lastTapTimeRef.current = now;
+   
+   // Use timeout to differentiate between single and double click
+   clearTimeout(clickTimeoutRef.current);
+   clickTimeoutRef.current = setTimeout(() => {
+     // This was a single click - handle page turn
+     handlePageTurn();
+   }, 300);
+ };
+
+ // Dedicated zoom handler
+ const handleZoom = () => {
+  if (hasZoomableContent && zoomContent) {
+    console.log(`Zooming in on ${visibleSide} text content for page ${number}`);
     setZoomPage({ isZoomed: true, pageData: zoomContent });
+    setHighlighted(false);
   }
 };
+ 
+ // Dedicated page turn handler
+ const handlePageTurn = () => {
+   // Single tap - handle page turning with proper RTL support
+   let pageToSet;
+   
+   if (props.isRTL === true) {
+     // RTL: Moving forward means decreasing the page number
+     pageToSet = opened ? number + 1 : number;
+   } else {
+     // LTR: Moving forward means increasing the page number
+     pageToSet = opened ? number : number + 1;
+   }
+   
+   // Ensure we don't go past the first or last page
+   pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
+   
+   console.log(`Turning page to: ${pageToSet} (RTL: ${props.isRTL})`);
+   setPage(pageToSet);
+   setHighlighted(false);
+ };
 
+ // Add explicit double click handler for desktop
+ const handleDoubleClick = (e) => {
+   e.stopPropagation();
+   e.preventDefault();
+   clearTimeout(clickTimeoutRef.current);
+   handleZoom();
+ };
 
-// Around line 453, in the Page component return statement
-return (
+ // Clean up timeouts when component unmounts
+ useEffect(() => {
+   return () => {
+     clearTimeout(clickTimeoutRef.current);
+   };
+ }, []);
+ 
+ return (
   <group
     {...props}
     ref={group}
@@ -554,7 +582,7 @@ return (
       setHighlighted(false);
     }}
     onClick={handleClick}
-    onDoubleClick={handleDoubleClick} // Add this line to connect the double click handler
+    onDoubleClick={handleDoubleClick}
   >
     <primitive
       object={manualSkinnedMesh}
@@ -562,19 +590,43 @@ return (
       position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
     />
 
-    {/* Zoom indicator for text pages */}
+    {/* Enhanced zoom indicator for text pages - more visible and only shows for visible text content */}
     {hasZoomableContent && highlighted && (
-      <mesh position={[PAGE_WIDTH - 0.2, PAGE_HEIGHT - 0.2, 0.01]}>
-        <sphereGeometry args={[0.05, 16, 16]} />
-        <meshStandardMaterial color="#e2c87d" emissive="#d4af37" emissiveIntensity={0.5} />
-      </mesh>
+      <group position={[PAGE_WIDTH - 0.2, PAGE_HEIGHT - 0.2, 0.01]} onClick={(e) => {
+        e.stopPropagation();
+        handleZoom(); // Direct zoom when clicking the indicator
+      }}>
+        {/* Add a backing circle for better visibility */}
+        <mesh>
+          <sphereGeometry args={[0.06, 16, 16]} />
+          <meshStandardMaterial color="#000000" opacity={0.5} transparent />
+        </mesh>
+        
+        {/* Main indicator with pulsing effect */}
+        <mesh>
+          <sphereGeometry args={[0.05, 16, 16]} />
+          <meshStandardMaterial 
+            color="#e2c87d" 
+            emissive="#d4af37" 
+            emissiveIntensity={0.5 + Math.sin(Date.now() * 0.005) * 0.3} 
+          />
+        </mesh>
+        
+        {/* Add a zoom icon inside */}
+        <mesh rotation={[0, 0, Math.PI/4]} position={[0, 0, 0.02]}>
+          <boxGeometry args={[0.03, 0.01, 0.001]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+        <mesh position={[0, 0, 0.02]}>
+          <boxGeometry args={[0.01, 0.03, 0.001]} />
+          <meshStandardMaterial color="#ffffff" />
+        </mesh>
+      </group>
     )}
   </group>
 );
 };
 
-// In the Book component
-// In the Book component
 export const Book = ({ bookData, ...props }) => {
   const [page, setPage] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
@@ -631,29 +683,22 @@ export const Book = ({ bookData, ...props }) => {
     }
   }, [page]);
 
-  // Add debug information to help troubleshoot
-  useEffect(() => {
-    if (isHebrewBook) {
-      console.log("Hebrew book - RTL mode active");
-      console.log("Current page:", page, "Delayed page:", delayedPage);
-    }
-  }, [page, delayedPage, isHebrewBook]);
-
   // Handle case where pages is not yet available
   if (!pages) return null;
 
   return (
     // Apply a y-rotation based on language direction
-    <group {...props} rotation-y={isHebrewBook ? Math.PI / 2 : -Math.PI / 2}>
-      {/* For Hebrew books, reverse the pages array and adjust page numbers */}
+    // For RTL books, we need to rotate in the opposite direction
+    <group {...props} rotation-y={isHebrewBook ? -Math.PI / 2 : -Math.PI / 2}>
       {isHebrewBook 
         ? [...pages].reverse().map((pageData, index) => (
             <Page
               key={index}
               bookId={bookId}
-              page={delayedPage} // Use delayedPage for animation
+              page={delayedPage}
               number={pages.length - 1 - index}
-              opened={delayedPage > pages.length - 1 - index}
+              // For RTL books, we need to flip the opened condition
+              opened={isHebrewBook ? (delayedPage < pages.length - index) : (delayedPage > pages.length - 1 - index)}
               bookClosed={delayedPage === 0 || delayedPage === pages.length}
               pagesLength={pages.length}
               {...pageData}
@@ -664,7 +709,7 @@ export const Book = ({ bookData, ...props }) => {
             <Page
               key={index}
               bookId={bookId}
-              page={delayedPage} // Use delayedPage for animation
+              page={delayedPage}
               number={index}
               opened={delayedPage > index}
               bookClosed={delayedPage === 0 || delayedPage === pages.length}

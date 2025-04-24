@@ -40,6 +40,7 @@ export const ZoomedTextView = () => {
     }, 300);
   };
   
+  // Don't render if not zoomed
   if (!zoomPage.isZoomed || !zoomPage.pageData) return null;
   
   const { content, language, bgColor } = zoomPage.pageData;
@@ -51,13 +52,13 @@ export const ZoomedTextView = () => {
             ${isAnimating ? "opacity-0" : "opacity-100"}
             ${isHebrew ? "rtl" : "ltr"}`}
         style={{ backgroundColor: bgColor || "#1a2a48" }}
-        onClick={closeZoom} // Add this to close when tapping anywhere
+        onClick={closeZoom}
         dir={isHebrew ? "rtl" : "ltr"}
         >
       {/* Header with close button - adjusted for RTL */}
       <div 
         className="flex justify-between items-center p-4 border-b border-[#d4af37]/30"
-        onClick={(e) => e.stopPropagation()} // Add this to prevent header clicks from closing
+        onClick={(e) => e.stopPropagation()}
         >
         <h2 className={`text-[#e2c87d] text-xl ${isHebrew ? "hebrew-text" : ""}`}>
             {content.title || "Reading Mode"}
@@ -73,7 +74,7 @@ export const ZoomedTextView = () => {
         </button>
       </div>
       
-      {/* Scrollable content - with RTL support */}
+      {/* Scrollable content - enhanced for better readability */}
       <div className="flex-1 overflow-y-auto p-6">
         {/* Title & Subtitle */}
         {content.title && (
@@ -90,7 +91,7 @@ export const ZoomedTextView = () => {
           </div>
         )}
         
-        {/* Main text content */}
+        {/* Main text content with improved styling */}
         {content.text && (
           <div 
             className={`
@@ -99,7 +100,7 @@ export const ZoomedTextView = () => {
             `}
           >
             {content.text.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4">{paragraph}</p>
+              <p key={index} className="mb-4 px-4 py-2 bg-black/20 rounded">{paragraph}</p>
             ))}
           </div>
         )}
