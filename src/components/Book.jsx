@@ -20,6 +20,10 @@ import {
 import { degToRad } from "three/src/math/MathUtils.js";
 // Import only pageAtom, not pages
 import { pageAtom } from "./UI";
+import { atom } from "jotai";
+
+export const zoomPageAtom = atom({ isZoomed: false, pageData: null });
+
 
 const easingFactor = 0.5; // Controls the speed of the easing
 const easingFactorFold = 0.3; // Controls the speed of the easing
@@ -456,8 +460,18 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
   });
 
   const [_, setPage] = useAtom(pageAtom);
+  const [, setZoomPage] = useAtom(zoomPageAtom);
   const [highlighted, setHighlighted] = useState(false);
   useCursor(highlighted);
+
+  // Check if this page has text content that can be zoomed
+  const hasZoomableContent = useMemo(() => {
+    return (front.type === "text" || back.type === "text");
+  }, [front.type, back.type]);
+
+  
+  // Track tap timing for mobile double-tap detection
+  const lastTapTimeRef = useRef(0);
 
   // Update the Page component to handle story pagination clicks properly
   // Remove the following from createTextTexture function
@@ -469,11 +483,51 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
 const handleClick = (e) => {
   e.stopPropagation();
   
-  console.log("Turning page");
-  setPage(opened ? number : number + 1);
+  const now = Date.now();
+  const DOUBLE_TAP_DELAY = 300; // ms
+  
+  if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
+    // Handle double-tap for zooming
+    if (hasZoomableContent) {
+      const zoomContent = front.type === "text" ? front : back.type === "text" ? back : null;
+      if (zoomContent) {
+        console.log("Double-tap detected - zooming in on text content");
+        setZoomPage({ isZoomed: true, pageData: zoomContent });
+        lastTapTimeRef.current = 0; // Reset to prevent further actions
+        return;
+      }
+    }
+  } else {
+    // Single tap - handle page turning
+    const pageToSet = (props.isRTL === true) 
+      ? (opened ? number : number - 1)  // RTL direction
+      : (opened ? number : number + 1); // LTR direction
+    
+    console.log("Turning page to:", pageToSet);
+    setPage(pageToSet);
+  }
+  
+  lastTapTimeRef.current = now;
   setHighlighted(false);
 };
 
+// Add a double click handler for zooming
+const handleDoubleClick = (e) => {
+  e.stopPropagation();
+  
+  if (!hasZoomableContent) return;
+  
+  // Determine which side (front/back) has text content to zoom
+  const zoomContent = front.type === "text" ? front : back.type === "text" ? back : null;
+  
+  if (zoomContent) {
+    console.log("Zooming in on text content");
+    setZoomPage({ isZoomed: true, pageData: zoomContent });
+  }
+};
+
+
+// Around line 453, in the Page component return statement
 return (
   <group
     {...props}
@@ -487,12 +541,21 @@ return (
       setHighlighted(false);
     }}
     onClick={handleClick}
+    onDoubleClick={handleDoubleClick} // Add this line to connect the double click handler
   >
     <primitive
       object={manualSkinnedMesh}
       ref={skinnedMeshRef}
       position-z={-number * PAGE_DEPTH + page * PAGE_DEPTH}
     />
+
+    {/* Zoom indicator for text pages */}
+    {hasZoomableContent && highlighted && (
+      <mesh position={[PAGE_WIDTH - 0.2, PAGE_HEIGHT - 0.2, 0.01]}>
+        <sphereGeometry args={[0.05, 16, 16]} />
+        <meshStandardMaterial color="#e2c87d" emissive="#d4af37" emissiveIntensity={0.5} />
+      </mesh>
+    )}
   </group>
 );
 };
@@ -501,6 +564,11 @@ export const Book = ({ bookData, ...props }) => {
   const [page] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
   const { pages, id: bookId } = bookData;
+
+  // Check if it's a Hebrew book (assuming first page indicates language)
+  const isHebrewBook = pages && pages.length > 0 && 
+    ((pages[0].front && pages[0].front.language === 'hebrew') || 
+     (pages[0].back && pages[0].back.language === 'hebrew'));
 
   useEffect(() => {
     // Preload textures for this book
@@ -547,19 +615,36 @@ export const Book = ({ bookData, ...props }) => {
   if (!pages) return null;
 
   return (
-    <group {...props} rotation-y={-Math.PI / 2}>
-      {pages.map((pageData, index) => (
-        <Page
-          key={index}
-          bookId={bookId}
-          page={delayedPage}
-          number={index}
-          opened={delayedPage > index}
-          bookClosed={delayedPage === 0 || delayedPage === pages.length}
-          pagesLength={pages.length} // Pass pages length instead of using pages directly
-          {...pageData}
-        />
-      ))}
+    <group {...props} rotation-y={isHebrewBook ? Math.PI / 2 : -Math.PI / 2}>
+      {/* Flip the order of pages for Hebrew books */}
+      {isHebrewBook 
+        ? [...pages].reverse().map((pageData, index) => (
+            <Page
+              key={index}
+              bookId={bookId}
+              page={delayedPage}
+              number={pages.length - 1 - index} // Adjust the page number
+              opened={delayedPage > pages.length - 1 - index}
+              bookClosed={delayedPage === 0 || delayedPage === pages.length}
+              pagesLength={pages.length}
+              {...pageData}
+              isRTL={true} // Pass RTL flag
+            />
+          ))
+        : pages.map((pageData, index) => (
+            <Page
+              key={index}
+              bookId={bookId}
+              page={delayedPage}
+              number={index}
+              opened={delayedPage > index}
+              bookClosed={delayedPage === 0 || delayedPage === pages.length}
+              pagesLength={pages.length}
+              {...pageData}
+              isRTL={false}
+            />
+          ))
+      }
     </group>
   );
 };

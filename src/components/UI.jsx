@@ -1,6 +1,8 @@
 import { atom, useAtom } from "jotai";
 import { useEffect, useState, useRef } from "react";
 import { MobileNavigation } from "./MobileNavigation";
+import { ZoomedTextView } from "./ZoomedTextView"; // Import the new component
+import { zoomPageAtom } from "./Book"; // Import the zoom atom
 
 // Update the atom to reset when changing books
 export const pageAtom = atom(0);
@@ -66,6 +68,7 @@ const getPageLabel = (index, pages) => {
 
 export const UI = ({ bookData }) => {
   const [page, setPage] = useAtom(pageAtom);
+  const [zoomPage] = useAtom(zoomPageAtom); // Add zoom state
   const [showAllButtons, setShowAllButtons] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [showMobileNav, setShowMobileNav] = useState(true);
@@ -199,8 +202,13 @@ export const UI = ({ bookData }) => {
     return visiblePages;
   };
 
+  const shouldShowNav = !zoomPage.isZoomed && showMobileNav;
+
   return (
     <>
+      {/* Zoomed text view */}
+      <ZoomedTextView />
+
       <div 
         className="fixed inset-0 z-0"
         onClick={handleScreenTap}
@@ -226,8 +234,23 @@ export const UI = ({ bookData }) => {
             h-[1px] mt-1 md:mt-2 bg-gradient-to-r from-[#d4af37] via-[#f4e5b5] to-transparent
             ${isMobile && isLandscape ? 'w-24 mx-auto' : 'w-32 md:w-48'}
           `}></div>
+
+          {/* Add zoom instruction tip for desktop users */}
+          {!isMobile && !zoomPage.isZoomed && (
+            <div className="fixed bottom-4 right-4 bg-black/60 backdrop-blur-md rounded-lg px-4 py-2 border border-[#d4af37]/40 text-[#e2c87d] text-sm max-w-xs">
+              <div className="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h1a1 1 0 110 2H9v1a1 1 0 11-2 0V9H6a1 1 0 01-1-1z" />
+                  <path fillRule="evenodd" d="M2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm6-4a4 4 0 100 8 4 4 0 000-8z" clipRule="evenodd" />
+                </svg>
+                <span>Double-click any text page to zoom for easier reading</span>
+              </div>
+            </div>
+          )}
         </div>
         
+        
+
         {/* MOBILE NAVIGATION */}
         {isMobile && (
           <MobileNavigation 
@@ -237,41 +260,45 @@ export const UI = ({ bookData }) => {
           />
         )}
                     
-        {/* DESKTOP NAVIGATION - keep unchanged */}
-        {!isMobile && (
-          <div className="pointer-events-auto flex justify-center items-center py-4 md:py-6">
-            <div className="flex items-center gap-2 md:gap-4 px-4 md:px-10 overflow-x-auto max-w-full">
-              {/* Page buttons - full desktop view */}
-              {[...Array(pages.length).keys()].map((index) => {
-                const pageData = pages[index];
-                const hasTextContent = 
-                  (pageData && pageData.front && pageData.front.type === "text") || 
-                  (pageData && pageData.back && pageData.back.type === "text");
-                
-                return (
-                  <button
-                    key={index}
-                    className={`
-                      relative group overflow-hidden
-                      shadow-[0_3px_10px_rgba(0,0,0,0.25)] 
-                      transition-all duration-300 ease-out
-                      px-7 py-2.5
-                      text-xs tracking-[0.15em] uppercase font-light
-                      min-w-[60px]
-                      flex-shrink-0
-                      ${
-                        index === page
-                          ? "bg-gradient-to-br from-[#e2c87d] to-[#be8c3c] text-black border-[#f4e5b5]"
-                          : hasTextContent 
-                            ? "bg-black/30 text-[#e2c87d] hover:text-white backdrop-blur-md border border-[#d4af37]/40" 
-                            : "bg-black/20 text-[#e2c87d] hover:text-white backdrop-blur-md"
-                      }
-                    `}
-                    onClick={() => setPage(index)}
-                  >
-                    <span className="relative z-10">
-                      {getPageLabel(index, pages)}
-                    </span>
+        {/* DESKTOP NAVIGATION */}
+{!isMobile && (
+  <div className="pointer-events-auto flex justify-center items-center py-4 md:py-6 z-20">
+    <div className="flex items-center gap-2 md:gap-4 px-4 md:px-10 overflow-x-auto max-w-full">
+      {/* Page buttons - full desktop view */}
+      {[...Array(pages.length).keys()].map((index) => {
+        const pageData = pages[index];
+        const hasTextContent = 
+          (pageData && pageData.front && pageData.front.type === "text") || 
+          (pageData && pageData.back && pageData.back.type === "text");
+        
+        return (
+          <button
+            key={index}
+            className={`
+              relative group overflow-hidden
+              shadow-[0_3px_10px_rgba(0,0,0,0.25)] 
+              transition-all duration-300 ease-out
+              px-7 py-2.5
+              text-xs tracking-[0.15em] uppercase font-light
+              min-w-[60px]
+              flex-shrink-0
+              ${
+                index === page
+                  ? "bg-gradient-to-br from-[#e2c87d] to-[#be8c3c] text-black border-[#f4e5b5]"
+                  : hasTextContent 
+                    ? "bg-black/30 text-[#e2c87d] hover:text-white backdrop-blur-md border border-[#d4af37]/40" 
+                    : "bg-black/20 text-[#e2c87d] hover:text-white backdrop-blur-md"
+              }
+            `}
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log("Button clicked for page:", index);
+              setPage(index);
+            }}
+          >
+            <span className="relative z-10">
+              {getPageLabel(index, pages)}
+            </span>
 
                     <span className={`absolute inset-0 border border-[#d4af37] opacity-${index === page ? '90' : '30'} group-hover:opacity-70`}></span>
                     

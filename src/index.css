@@ -87,6 +87,24 @@
   }
 }
 
+
+/* Add this with your other RTL styles */
+/* Apply these styles to hebrew book container */
+.hebrew-book-container {
+  transform: scaleX(-1);
+}
+
+/* Ensure page controls are properly positioned in RTL mode */
+.rtl-book .page-controls {
+  flex-direction: row-reverse;
+}
+
+/* Apply this to the Experience component when showing a Hebrew book */
+.rtl-book-view {
+  direction: rtl;
+}
+
+
 /* Mobile landscape mode optimizations */
 @media (max-width: 768px) and (orientation: landscape) {
   /* Reduce title size in landscape */

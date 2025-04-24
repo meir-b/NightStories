@@ -1,9 +1,11 @@
 import { useAtom } from "jotai";
 import { pageAtom } from "./UI";
+import { zoomPageAtom } from "./Book";  // Import the zoom atom
 import { useState, useEffect, useRef } from "react";
 
 export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
   const [, setPage] = useAtom(pageAtom);
+  const [zoomPage, setZoomPage] = useAtom(zoomPageAtom);  // Add zoom state
   const [expanded, setExpanded] = useState(false);
   const [showTopNav, setShowTopNav] = useState(false);
   const timeoutRef = useRef(null);
@@ -78,7 +80,39 @@ export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
     resetTimer();
   };
 
-  return (
+  // Function to check if current page has text content
+  const hasTextContent = () => {
+    if (!pages || page <= 0 || page > pages.length) return false;
+    
+    const currentPage = pages[page - 1];
+    if (!currentPage) return false;
+    
+    return (currentPage.front?.type === "text" || currentPage.back?.type === "text");
+  };
+  
+  // Function to handle zoom button click
+  const handleZoom = (e) => {
+    e.stopPropagation();
+    
+    if (!hasTextContent()) return;
+    
+    // Find the text content to zoom
+    const currentPage = pages[page - 1];
+    const textContent = currentPage.front?.type === "text" 
+      ? currentPage.front 
+      : currentPage.back?.type === "text" 
+        ? currentPage.back 
+        : null;
+        
+    if (textContent) {
+      console.log("Zooming in on text from nav");
+      setZoomPage({ isZoomed: true, pageData: textContent });
+    }
+    
+    resetTimer();
+  };
+
+    return (
     <>
       {/* Main floating action button */}
       <button
@@ -136,6 +170,21 @@ export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
           </svg>
         </button>
         
+        {/* Zoom button - only show on text pages */}
+        {hasTextContent() && (
+          <button
+            onClick={handleZoom}
+            type="button"
+            className="w-12 h-12 rounded-full flex items-center justify-center bg-black/60 backdrop-blur-md border border-[#d4af37]/60 shadow-lg mobile-tap-effect cursor-pointer"
+            aria-label="Zoom text"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#e2c87d]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 8a1 1 0 011-1h1V6a1 1 0 012 0v1h1a1 1 0 110 2H9v1a1 1 0 11-2 0V9H6a1 1 0 01-1-1z" />
+              <path fillRule="evenodd" d="M2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8zm6-4a4 4 0 100 8 4 4 0 000-8z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
+        
         {/* Next page button */}
         <button
           onClick={handleNextPage}
@@ -168,7 +217,7 @@ export const MobileNavigation = ({ pages, page, getVisiblePages }) => {
           </svg>
         </button>
       </div>
-
+      
       {/* Page selector that slides in from top - fixed to ensure it works on mobile */}
       <div 
         className={`
