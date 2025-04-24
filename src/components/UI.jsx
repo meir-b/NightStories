@@ -204,6 +204,10 @@ export const UI = ({ bookData }) => {
 
   const shouldShowNav = !zoomPage.isZoomed && showMobileNav;
 
+  const isHebrewBook = bookData && bookData.pages && bookData.pages.length > 0 && 
+  ((bookData.pages[0].front && bookData.pages[0].front.language === 'hebrew') || 
+   (bookData.pages[0].back && bookData.pages[0].back.language === 'hebrew'));
+
   return (
     <>
       {/* Zoomed text view */}

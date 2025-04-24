@@ -480,6 +480,7 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
 // 3. Keep only the basic text rendering functionality
 
 // Update the handleClick function to only handle page turning
+// Update the handleClick function to properly handle RTL navigation
 const handleClick = (e) => {
   e.stopPropagation();
   
@@ -489,21 +490,33 @@ const handleClick = (e) => {
   if (now - lastTapTimeRef.current < DOUBLE_TAP_DELAY) {
     // Handle double-tap for zooming
     if (hasZoomableContent) {
+      // Determine which side has text content to zoom
       const zoomContent = front.type === "text" ? front : back.type === "text" ? back : null;
+      
       if (zoomContent) {
-        console.log("Double-tap detected - zooming in on text content");
+        console.log("Double-tap zoom on text content");
         setZoomPage({ isZoomed: true, pageData: zoomContent });
-        lastTapTimeRef.current = 0; // Reset to prevent further actions
-        return;
       }
     }
   } else {
-    // Single tap - handle page turning
-    const pageToSet = (props.isRTL === true) 
-      ? (opened ? number : number - 1)  // RTL direction
-      : (opened ? number : number + 1); // LTR direction
+    // Single tap - handle page turning with proper RTL support
+    let pageToSet;
     
-    console.log("Turning page to:", pageToSet);
+    if (props.isRTL === true) {
+      // RTL: Moving forward means decreasing the page number
+      pageToSet = opened ? number + 1 : number;
+      
+      // Ensure we don't go past the first or last page
+      pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
+    } else {
+      // LTR: Moving forward means increasing the page number
+      pageToSet = opened ? number : number + 1;
+      
+      // Ensure we don't go past the first or last page
+      pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
+    }
+    
+    console.log(`Turning page to: ${pageToSet} (RTL: ${props.isRTL})`);
     setPage(pageToSet);
   }
   
@@ -560,9 +573,13 @@ return (
 );
 };
 
+// In the Book component
+// In the Book component
 export const Book = ({ bookData, ...props }) => {
-  const [page] = useAtom(pageAtom);
+  const [page, setPage] = useAtom(pageAtom);
   const [delayedPage, setDelayedPage] = useState(page);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const animationRef = useRef(null);
   const { pages, id: bookId } = bookData;
 
   // Check if it's a Hebrew book (assuming first page indicates language)
@@ -570,72 +587,84 @@ export const Book = ({ bookData, ...props }) => {
     ((pages[0].front && pages[0].front.language === 'hebrew') || 
      (pages[0].back && pages[0].back.language === 'hebrew'));
 
+  // Handle animation of multiple page turns
   useEffect(() => {
-    // Preload textures for this book
-    if (pages) {
-      pages.forEach((page) => {
-        if (page.front.type === "photo") {
-          useTexture.preload(GetPath(bookId, page.front.src));
-        }
-        if (page.back.type === "photo") {
-          useTexture.preload(GetPath(bookId, page.back.src));
-        }
-      });
+    // Cancel any existing animation
+    if (animationRef.current) {
+      clearInterval(animationRef.current);
+      animationRef.current = null;
     }
     
-    // Page turning logic remains the same
-    let timeout;
-    const goToPage = () => {
-      setDelayedPage((delayedPage) => {
-        if (page === delayedPage) {
-          return delayedPage;
-        } else {
-          timeout = setTimeout(
-            () => {
-              goToPage();
-            },
-            Math.abs(page - delayedPage) > 2 ? 50 : 150
-          );
-          if (page > delayedPage) {
-            return delayedPage + 1;
-          }
-          if (page < delayedPage) {
-            return delayedPage - 1;
-          }
+    // Only animate if there's a large jump between pages (e.g., to cover or back)
+    const pageDistance = Math.abs(delayedPage - page);
+    if (pageDistance > 1) {
+      setIsAnimating(true);
+      let currentPage = delayedPage;
+      const direction = delayedPage < page ? 1 : -1;
+      
+      // Set animation interval - flip pages one by one
+      animationRef.current = setInterval(() => {
+        currentPage += direction;
+        
+        // Update the delayedPage to show animation
+        setDelayedPage(currentPage);
+        
+        // Stop when we reach target page
+        if ((direction > 0 && currentPage >= page) || 
+            (direction < 0 && currentPage <= page)) {
+          clearInterval(animationRef.current);
+          animationRef.current = null;
+          setDelayedPage(page);
+          setIsAnimating(false);
         }
-      });
-    };
-    goToPage();
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [page, bookId, pages]);
+      }, 150); // Adjust speed as needed
+      
+      return () => {
+        if (animationRef.current) {
+          clearInterval(animationRef.current);
+          animationRef.current = null;
+        }
+      };
+    } else {
+      // For single page turns, just update normally
+      setDelayedPage(page);
+    }
+  }, [page]);
+
+  // Add debug information to help troubleshoot
+  useEffect(() => {
+    if (isHebrewBook) {
+      console.log("Hebrew book - RTL mode active");
+      console.log("Current page:", page, "Delayed page:", delayedPage);
+    }
+  }, [page, delayedPage, isHebrewBook]);
 
   // Handle case where pages is not yet available
   if (!pages) return null;
 
   return (
+    // Apply a y-rotation based on language direction
     <group {...props} rotation-y={isHebrewBook ? Math.PI / 2 : -Math.PI / 2}>
-      {/* Flip the order of pages for Hebrew books */}
+      {/* For Hebrew books, reverse the pages array and adjust page numbers */}
       {isHebrewBook 
         ? [...pages].reverse().map((pageData, index) => (
             <Page
               key={index}
               bookId={bookId}
-              page={delayedPage}
-              number={pages.length - 1 - index} // Adjust the page number
+              page={delayedPage} // Use delayedPage for animation
+              number={pages.length - 1 - index}
               opened={delayedPage > pages.length - 1 - index}
               bookClosed={delayedPage === 0 || delayedPage === pages.length}
               pagesLength={pages.length}
               {...pageData}
-              isRTL={true} // Pass RTL flag
+              isRTL={true}
             />
           ))
         : pages.map((pageData, index) => (
             <Page
               key={index}
               bookId={bookId}
-              page={delayedPage}
+              page={delayedPage} // Use delayedPage for animation
               number={index}
               opened={delayedPage > index}
               bookClosed={delayedPage === 0 || delayedPage === pages.length}

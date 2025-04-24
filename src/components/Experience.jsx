@@ -1,7 +1,7 @@
 import { Environment, OrbitControls } from "@react-three/drei";
 import { useThree, useFrame } from "@react-three/fiber";
 import { Book } from "./Book";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";  // Add useMemo here
 import { useAtom } from "jotai";
 import { pageAtom } from "./UI";
 
@@ -16,7 +16,26 @@ export const Experience = ({ bookData }) => {
   
   // Add state to track orientation
   const [isLandscape, setIsLandscape] = useState(false);
+
+  // Define windowWidth for use in the dependency array
+  const windowWidth = viewport.width;
+
+  // Add a check for Hebrew content
+  const isHebrewBook = bookData && bookData.pages && bookData.pages.length > 0 && 
+    ((bookData.pages[0].front && bookData.pages[0].front.language === 'hebrew') || 
+     (bookData.pages[0].back && bookData.pages[0].back.language === 'hebrew'));
   
+  // Adjust camera position and other settings based on RTL
+  const cameraPosition = useMemo(() => {
+    const defaultPosition = [-0.25, 0.0, 7.2]; // Your existing camera position
+    
+    // For RTL books, mirror the X position
+    return isHebrewBook 
+      ? [defaultPosition[0] * -1, defaultPosition[1], defaultPosition[2]]
+      : defaultPosition;
+  }, [windowWidth, isHebrewBook]);
+
+
   // Update orientation state based on viewport
   useEffect(() => {
     setIsLandscape(viewport.width > viewport.height);
@@ -112,6 +131,7 @@ export const Experience = ({ bookData }) => {
         position={position}
         scale={scale}
         onClick={handleInteraction}
+        className={isHebrewBook ? "hebrew-book-container" : ""}
       >
         <Book bookData={bookData} />
       </group>
