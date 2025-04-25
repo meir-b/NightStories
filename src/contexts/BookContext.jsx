@@ -24,7 +24,7 @@ export function BookProvider({ children }) {
         console.log("BASE_URL:", import.meta.env.BASE_URL);
         
         // Define the known story directories - this could be fetched from an API in production
-        const knownStoryDirs = ['Story1']; //, 'Story2'];
+        const knownStoryDirs = ['Story1', 'Story1 - Copy']; //, 'Story2'];
         const discoveredBooks = [];
         
         // For each directory, try to load its manifest
@@ -106,7 +106,7 @@ export function BookProvider({ children }) {
   const loadBook = async (bookId) => {
     try {
       setIsLoading(true);
-      setPage(0); // Reset to first page when loading a new book
+      //setPage(0); // Reset to first page when loading a new book
       
       const response = await fetch(`${import.meta.env.BASE_URL}Content/${bookId}/manifest.json`);
       
@@ -117,6 +117,7 @@ export function BookProvider({ children }) {
       const bookData = await response.json();
       setSelectedBook({
         id: bookId,
+        startFromBack: bookData.startFromBack || false, // Default to false if not specified
         ...bookData
       });
     } catch (err) {

@@ -538,18 +538,11 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
    // Single tap - handle page turning with proper RTL support
    let pageToSet;
    
-   if (props.isRTL === true) {
-     // RTL: Moving forward means decreasing the page number
-     pageToSet = opened ? number + 1 : number;
-   } else {
-     // LTR: Moving forward means increasing the page number
-     pageToSet = opened ? number : number + 1;
-   }
+   pageToSet = opened ? number : number + 1;
    
    // Ensure we don't go past the first or last page
    pageToSet = Math.min(Math.max(0, pageToSet), pagesLength);
    
-   console.log(`Turning page to: ${pageToSet} (RTL: ${props.isRTL})`);
    setPage(pageToSet);
    setHighlighted(false);
  };
@@ -628,16 +621,32 @@ const Page = ({ bookId, number, front, back, page, opened, bookClosed, pagesLeng
 };
 
 export const Book = ({ bookData, ...props }) => {
-  const [page, setPage] = useAtom(pageAtom);
+  // Initialize page state with the appropriate starting position
+  const initializeBookPosition = () => {
+    // Check if book has a specific starting position in manifest
+    if (bookData.startFromBack) {
+      // Return the last page (pages.length for back cover)
+      return bookData.pages?.length || 0;
+    }
+    
+    // Default starting position is the front (0)
+    return 0;
+  };
+
+  // Use the initializer function when setting up atom state
+  const [page, setPage] = useAtom(pageAtom, {
+    init: () => initializeBookPosition()
+  });
+
   const [delayedPage, setDelayedPage] = useState(page);
   const [isAnimating, setIsAnimating] = useState(false);
   const animationRef = useRef(null);
   const { pages, id: bookId } = bookData;
 
-  // Check if it's a Hebrew book (assuming first page indicates language)
-  const isHebrewBook = pages && pages.length > 0 && 
-    ((pages[0].front && pages[0].front.language === 'hebrew') || 
-     (pages[0].back && pages[0].back.language === 'hebrew'));
+    // Reset page state when book changes, using the proper starting position
+  useEffect(() => {
+    setPage(initializeBookPosition());
+  }, [bookData.id]); // Only reset when the book ID changes
 
   // Handle animation of multiple page turns
   useEffect(() => {
@@ -689,23 +698,8 @@ export const Book = ({ bookData, ...props }) => {
   return (
     // Apply a y-rotation based on language direction
     // For RTL books, we need to rotate in the opposite direction
-    <group {...props} rotation-y={isHebrewBook ? -Math.PI / 2 : -Math.PI / 2}>
-      {isHebrewBook 
-        ? [...pages].reverse().map((pageData, index) => (
-            <Page
-              key={index}
-              bookId={bookId}
-              page={delayedPage}
-              number={pages.length - 1 - index}
-              // For RTL books, we need to flip the opened condition
-              opened={isHebrewBook ? (delayedPage < pages.length - index) : (delayedPage > pages.length - 1 - index)}
-              bookClosed={delayedPage === 0 || delayedPage === pages.length}
-              pagesLength={pages.length}
-              {...pageData}
-              isRTL={true}
-            />
-          ))
-        : pages.map((pageData, index) => (
+    <group {...props} rotation-y={-Math.PI / 2}>
+      { pages.map((pageData, index) => (
             <Page
               key={index}
               bookId={bookId}
