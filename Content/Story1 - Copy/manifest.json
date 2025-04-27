@@ -1,0 +1,68 @@
+{
+    "title": "בדיקה",
+    "description": "בדיקה",
+    "coverImage": "red-truck.jpeg",
+    "startFromBack": true,
+    "pages": [
+      {
+        "front": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "text": "כריכה סוגרת "
+          },
+          "bgColor": "#1a2a48"
+        },
+        "back": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "text": "עמוד 4 "
+          },
+          "bgColor": "#1a2a48"
+        }
+      },
+      {
+        "front": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "text": "3 "
+          },
+          "bgColor": "#1a2a48"
+        },
+        "back": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "text": "2 "
+          },
+          "bgColor": "#1a2a48"
+        }
+      },
+      {
+        "front": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "title": "דוד והמשאית האדומה",
+            "subtitle": "שיתוף ותורנות",
+            "text": "בדיקה "
+          },
+          "bgColor": "#1a2a48"
+        },
+        "back": {
+          "type": "text",
+          "language": "hebrew",
+          "content": {
+            "text": "כריכה פותחת "
+          },
+          "bgColor": "#1a2a48"
+        }
+      }
+    ]
+  }
+
+
+
+  

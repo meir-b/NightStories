@@ -1,0 +1,62 @@
+{
+  "title": "אבי רוצה לשחק בקוביות",
+  "description": "איך מצטרפים למשחק של חברים?",
+  "coverImage": "joining_play_cover.jpg",
+  "startFromBack": true,
+  "pages": [
+    {
+      "front": {
+        "type": "photo",
+        "src": "Back_Story6.jpg" // Back cover image
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "אבי ניגש אליהם, הלב שלו דפק קצת... 'שלום,' הוא אמר, 'המגדל שלכם ממש יפה! אפשר אולי... לשחק אתכם?' יצחק ובנימין חייכו חיוך ענק! 'בטח!', קרא יצחק. 'בוא תעזור לנו עם הגג!', אמר בנימין. איזה כיף! אבי התיישב איתם והתחיל לבנות. לשחק יחד זה הכי הכי כיף!"
+        },
+        "bgColor": "#cfe2f3"
+      }
+    },
+    {
+      "front": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "אבא של אבי ראה אותו עומד בצד. 'מה קרה, אבי?', הוא שאל ברכות. 'אני רוצה לשחק איתם,' לחש אבי, 'אבל אני מתבייש לבקש.' אבא חייך. 'זה קל! פשוט תלך ותשאל יפה: 'אפשר לשחק אתכם?' רוב הילדים אוהבים שמצטרפים אליהם!'"
+        },
+        "bgColor": "#cfe2f3"
+      },
+      "back": {
+          "type": "photo",
+          "src": "father_talking_to_avi.jpg"
+        }
+    },
+    {
+      "front": {
+        "type": "photo",
+        "src": "avi_watching_shyly.jpg"
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "title": "מגדל קוביות ענקי!",
+          "subtitle": "איך אבי יצטרף?",
+          "text": "וואו! יצחק ובנימין בנו מגדל קוביות הכי גבוה בעולם! הוא הגיע כמעט עד התקרה! אבי הקטן הסתכל עליהם מהצד. הוא כל כך רצה לעזור להם, להוסיף עוד קוביה אדומה למעלה! אבל... הוא היה קצת ביישן. מה אם הם יגידו לא?"
+        },
+        "bgColor": "#cfe2f3"
+      }
+    },
+    {
+      "front": {
+           "type": "photo",
+           "src": "kids_building_together.jpg" // Internal illustration
+         },
+      "back": {
+        "type": "photo",
+        "src": "joining_play_cover.jpg" // Front cover image
+      }
+    }
+  ]
+}

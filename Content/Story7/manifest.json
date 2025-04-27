@@ -1,0 +1,62 @@
+{
+  "title": "אסתי ומרים רוצות להיות אמא",
+  "description": "איך פותרים בעיה כששתי חברות רוצות אותו דבר?",
+  "coverImage": "disagreement_cover.jpg",
+  "startFromBack": true,
+  "pages": [
+    {
+      "front": {
+        "type": "photo",
+        "src": "Back_Story7.jpg" // Back cover image
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "'שני הרעיונות נהדרים!', אמרה הגננת. 'מה תבחרו?' הבנות הסתכלו זו על זו. 'אני אהיה הדודה שמביאה עוגה דמיונית טעימה!', קראה מרים בהתלהבות. 'מעולה!', צחקה אסתי, 'ואני אהיה האמא ואכין תה!' הן שיחררו את הסינר וחזרו לשחק בשמחה. למצוא פתרון ביחד זה משחק נהדר!"
+        },
+        "bgColor": "#fce5cd"
+      }
+    },
+    {
+      "front": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "הגננת רחל שמעה את הוויכוח הקטן. 'בנות מתוקות,' היא אמרה, 'אני רואה ששתיכן רוצות להיות האמא. זה תפקיד כיפי! אבל יש רק סינר אחד של אמא. איך אפשר לפתור את זה ששתיכן תהיו שמחות?' אסתי חשבה... מרים חשבה... 'אולי נהיה אמא בתורות?', הציעה אסתי. 'או שאחת תהיה אמא והשנייה דודה שבאה לבקר?', הציעה מרים."
+        },
+        "bgColor": "#fce5cd"
+      },
+      "back": {
+          "type": "photo",
+          "src": "teacher_talking_to_girls.jpg"
+        }
+    },
+    {
+      "front": {
+        "type": "photo",
+        "src": "girls_pulling_apron.jpg"
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "title": "משחק בפינת הבית",
+          "subtitle": "מי תהיה האמא?",
+          "text": "אסתי ומרים שיחקו בפינת הבית, המקום האהוב עליהן בגן. 'אני אמא!', הכריזה אסתי ותפסה מהר את הסינר הפרחוני. 'לא, אני רציתי להיות אמא היום!', קראה מרים ותפסה את הצד השני של הסינר. מושכות ומושכות! אף אחת לא ויתרה. אוי, מה עושים עכשיו?"
+        },
+        "bgColor": "#fce5cd"
+      }
+    },
+    {
+      "front": {
+           "type": "photo",
+           "src": "girls_playing_happily_again.jpg" // Internal illustration
+         },
+      "back": {
+        "type": "photo",
+        "src": "disagreement_cover.jpg" // Front cover image
+      }
+    }
+  ]
+}
