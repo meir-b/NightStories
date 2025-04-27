@@ -1,13 +1,13 @@
 {
   "title": "חיים לומד לשחק בעדינות",
   "description": "משחקים תופסת בלי לדחוף חזק",
-  "coverImage": "gentle_hands_cover.jpg",
+  "coverImage": "Cover Image.jpeg",
   "startFromBack": true,
   "pages": [
     {
       "front": {
         "type": "photo",
-        "src": "Back_Story4.jpg" // Back cover image
+        "src": "Back"
       },
       "back": {
         "type": "text",
@@ -15,27 +15,28 @@
         "content": {
           "text": "'אני מצטער, דוד,' אמר חיים בקול שקט. 'לא התכוונתי להפיל אותך.' דוד הפסיק לבכות. 'בסדר,' הוא אמר. 'בואו נשחק בנגיעות קלות כמו פרפר!', הציעה מור שרה. איזה רעיון נהדר! הם חזרו לשחק, רצים וצוחקים, וחיים זכר – ידיים עדינות זה הכי כיף!"
         },
-        "bgColor": "#d9ead3"
+        "bgColor": "#1a2a48"
       }
     },
     {
       "front": {
+          "type": "photo",
+          "src": "Boys Playing Gently.png"
+        },
+      "back": {
         "type": "text",
         "language": "hebrew",
         "content": {
           "text": "מור שרה ניגשה מהר ועזרה לדוד לקום. 'אוי, דוד, הכל בסדר?' היא ניקתה לו את הבגדים. 'חיים,' היא אמרה ברכות, 'אני רואה שאתה רץ ונהנה, זה נפלא! אבל תופסת משחקים בנגיעה קלה, לא בדחיפה. דחיפה יכולה להפחיד ולהכאיב.' חיים הרגיש קצת לא נעים בבטן."
         },
-        "bgColor": "#d9ead3"
-      },
-      "back": {
-          "type": "photo",
-          "src": "teacher_helping_dovid.jpg"
-        }
+        "bgColor": "#1a2a48"
+      }
+      
     },
     {
       "front": {
         "type": "photo",
-        "src": "chaim_pushing_dovid.jpg"
+        "src": "Teacher Helping Dovid.jpeg"
       },
       "back": {
         "type": "text",
@@ -45,17 +46,17 @@
           "subtitle": "אוי! מישהו נפל!",
           "text": "חיים ודוד שיחקו תופסת! ווּש! חיים רץ מהר כמו סופה, צוחק בקול רם. הוא רצה לתפוס את דוד! הוא התקרב... התקרב... ומרוב התלהבות – בום! הוא נתן לדוד דחיפה קטנה, אבל דוד איבד שיווי משקל ונפל על הדשא הרך. אוי לא! דוד נבהל וקצת בכה."
         },
-        "bgColor": "#d9ead3"
+        "bgColor": "#1a2a48"
       }
     },
     {
       "front": {
            "type": "photo",
-           "src": "boys_playing_gently.jpg" // Internal illustration
+           "src": "Chaim Pushing Dovid.jpeg"
          },
       "back": {
         "type": "photo",
-        "src": "gentle_hands_cover.jpg" // Front cover image
+        "src": "Front"
       }
     }
   ]

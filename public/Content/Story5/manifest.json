@@ -7,7 +7,7 @@
     {
       "front": {
         "type": "photo",
-        "src": "Back_Story5.jpg" // Back cover image
+        "src": "Back"
       },
       "back": {
         "type": "text",
@@ -55,7 +55,7 @@
          },
       "back": {
         "type": "photo",
-        "src": "listening_cover.jpg" // Front cover image
+        "src": "Front"
       }
     }
   ]
