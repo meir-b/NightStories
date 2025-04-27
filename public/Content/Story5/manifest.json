@@ -1,0 +1,62 @@
+{
+  "title": "שרה לומדת להקשיב באוזניים ובלב",
+  "description": "כשמקשיבים לחברים, כולם מרגישים טוב",
+  "coverImage": "listening_cover.jpg",
+  "startFromBack": true,
+  "pages": [
+    {
+      "front": {
+        "type": "photo",
+        "src": "Back_Story5.jpg" // Back cover image
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "'שרה, ספרי לנו שוב בבקשה על העוגה הטעימה!', ביקשה הגננת. שרה חייכה חיוך גדול! הפעם, כולם הסתכלו עליה והקשיבו בשקט. 'היו עליה סוכריות צבעוניות?', שאל יעקב. שרה הרגישה כל כך טוב! היא הבינה שלהקשיב זה כמו לתת מתנה לחבר."
+        },
+        "bgColor": "#fff2cc"
+      }
+    },
+    {
+      "front": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "הגננת רחל ראתה את הפרצוף המאוכזב של שרה. 'רגע, ילדים,' היא אמרה בקול נעים. 'שרה מספרת לנו משהו חשוב לה. כשחבר מדבר, בואו ניתן לו את הכבוד ונקשיב עם העיניים והאוזניים. ככה הוא ירגיש שמה שהוא אומר מעניין אותנו.' כולם השתתקו והסתכלו על שרה."
+        },
+        "bgColor": "#fff2cc"
+      },
+      "back": {
+          "type": "photo",
+          "src": "teacher_addressing_kids.jpg"
+        }
+    },
+    {
+      "front": {
+        "type": "photo",
+        "src": "sarah_talking_ignored.jpg"
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "title": "סיפורים במפגש הבוקר",
+          "subtitle": "למה אף אחד לא מקשיב?",
+          "text": "במפגש הבוקר, כל ילד סיפר משהו כיף! תורה של שרה הגיע. 'בשבת אמא שלי הכינה עוגה ענקית עם קצפת!', היא סיפרה בהתרגשות. אבל... אוי! יעקב דיבר עם משה, ורחלי הסתכלה על התקרה. אף אחד לא הקשיב לה! שרה הרגישה קצת כמו אוויר."
+        },
+        "bgColor": "#fff2cc"
+      }
+    },
+    {
+      "front": {
+           "type": "photo",
+           "src": "kids_listening_to_sarah.jpg" // Internal illustration
+         },
+      "back": {
+        "type": "photo",
+        "src": "listening_cover.jpg" // Front cover image
+      }
+    }
+  ]
+}

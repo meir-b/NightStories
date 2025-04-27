@@ -1,0 +1,63 @@
+{
+  "title": "רבקה ולאה והנדנדה המיוחדת",
+  "description": "איך לומדים לחכות בתור ולשתף בכיף",
+  "coverImage": "Back_Story2.jpeg",
+  "startFromBack": true,
+  "pages": [
+    {
+      "front": {
+        "type": "photo",
+        "src": "Back"
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "רבקה ספרה ללאה, 'אחת... שתיים... עשרים!' ונתנה לה תור. ואז לאה ספרה לרבקה! הן התנדנדו גבוה גבוה, צחקו וקראו, 'עוד פעם! עוד פעם!' הן גילו שלשתף ולחכות בתור זה אפילו יותר כיף מלריב. הנדנדה הפכה לנדנדת החברות הכי טובה!"
+        },
+        "bgColor": "#1a2a48"
+      }
+    },
+    {
+      
+      "front": {
+          "type": "photo",
+          "src": "Girls Swinging Happily - girls_swinging_happily.png"
+        },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "text": "אמא של לאה חייכה. 'יש לי רעיון של קסם!' היא אמרה. 'מה דעתכן שכל אחת תתנדנד קצת? נספור עד עשרים, ואז מחליפים! ככה שתיכן תהנו!' רבקה חשבה... זה נשמע הוגן. 'בסדר!' היא הסכימה. 'אני ראשונה!' לאה הנהנה, 'ואז אני!'"
+        },
+        "bgColor": "#1a2a48"
+      }
+    },
+    {
+      "front": {
+        "type": "photo",
+        "src": "Mother Suggesting Taking Turns - mother_talking.png"
+      },
+      "back": {
+        "type": "text",
+        "language": "hebrew",
+        "content": {
+          "title": "רבקה ולאה בגן השעשועים",
+          "subtitle": "מי יתנדנד ראשון?",
+          "text": "גן השעשועים היה מלא שמש וצחוק! רבקה ולאה, חברות טובות, רצו הכי מהר שהן יכלו אל הנדנדה האהובה עליהן. 'אני ראשונה!' צעקה רבקה. 'לא, אני!' קראה לאה. בום! שתיהן הגיעו יחד ותפסו חזק בנדנדה. אוח! הנדנדה לא זזה, והפרצופים שלהן נהיו קצת כועסים."
+        },
+        "bgColor": "#1a2a48"
+      }
+    },
+    {
+      "front": {
+           "type": "photo",
+           "src": "Girls Arguing Over the Swing - girls_arguing.jpeg"
+         },
+      "back": {
+        "type": "photo",
+        "src": "Front"
+      }
+    }
+  ]
+}

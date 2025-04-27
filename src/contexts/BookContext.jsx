@@ -24,7 +24,7 @@ export function BookProvider({ children }) {
         console.log("BASE_URL:", import.meta.env.BASE_URL);
         
         // Define the known story directories - this could be fetched from an API in production
-        const knownStoryDirs = ['Story1', 'Story1 - Copy']; //, 'Story2'];
+        const knownStoryDirs = ['Story1', '1', 'Story2', 'Story3','Story1 - Copy']; //, 'Story2'];
         const discoveredBooks = [];
         
         // For each directory, try to load its manifest
